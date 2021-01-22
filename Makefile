@@ -7,7 +7,7 @@ LD = arm-none-eabi-ld
 CFLAGS = -nostdlib
 LDFLAGS = -Tlinker_script.ld
 
-all: $(OBJS)
+firmware: $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $^
 
 %.o: %.c

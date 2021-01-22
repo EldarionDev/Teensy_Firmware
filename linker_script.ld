@@ -1,40 +1,38 @@
-Entry(start)
-
-MEMORY 
-{
-    FLASH(rx): ORIGIN = 0x0, LENGTH = 8M
-    OCRAM2(rwx): ORIGIN = 0x20200000, LENGTH = 512K
+MEMORY {
+    FLASH(rx): ORIGIN = 0x60000000, LENGTH = 8M
+    OCRAM(rwx): ORIGIN = 0x20200000, LENGTH = 512K
 }
+
+ENTRY(start)
 
 SECTIONS 
 {
-    .ivt: 
+    .data :
     {
-        . = 0x0
+        . = ORIGIN(FLASH) + 4K;
         *(.ivt)
-    } > FLASH
-
-    .flashconfig:
-    {
-        . = 0x400
-        *(.flashconfig)
-    } > FLASH
-
-    .data:
-    {
-        .= 0x658
+        . = ALIGN(4);
+        KEEP(*(.ivt));
+        *(.boot_data)
+        KEEP(*(.boot_data));
         *(.data)
-    }
+    } > FLASH
 
-    .text: 
+    .text :
     {
-        *(.bootdata)
+        . = ALIGN(4);
+        _startup_function = .;
+        *(.startup)
+        KEEP(*(.startup));
         *(.text)
-        *(.rodata)
-    } > OCRAM2 > AT > FLASH
+    } > OCRAM AT> FLASH
 
-    .bss:
+    .bss :
     {
+        __bss_start__ = .;
         *(.bss)
-    } > OCRAM2 > AT > FLASH
-}
+        __bss_end__ = .;
+    } > OCRAM
+
+    _image_size = SIZEOF(.data) + SIZEOF(.text);
+} 
